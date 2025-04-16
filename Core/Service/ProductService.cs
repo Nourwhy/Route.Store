@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Domain.Contracts;
 using Domain.Models;
-
+using Service.Specifications;
 using Services.Abstractions;
 using Shared;
 using System;
@@ -18,8 +18,10 @@ namespace Service
 
 
         public async Task<IEnumerable<ProductResultDto>> GetAllProductsAsync()
+
         {
-            var products = await unitOfWork.GetRepository<Product, int>().GetAllAsync();
+            var spec = new ProductWithBrandsAndTypesSpecififcations();
+            var products = await unitOfWork.GetRepository<Product, int>().GetAllAsync(spec);
 
             var result = mapper.Map<IEnumerable<ProductResultDto>>(products);
             return result;
@@ -29,7 +31,8 @@ namespace Service
 
         public async Task<ProductResultDto?> GetProductByIdAsync(int id)
         {
-            var product = await unitOfWork.GetRepository<Product, int>().GetAsync(id);
+            var spec = new ProductWithBrandsAndTypesSpecififcations(id);
+            var product = await unitOfWork.GetRepository<Product, int>().GetAsync(spec);
             if (product is null) return null;
             var result = mapper.Map<ProductResultDto>(product);
             return result;
@@ -43,7 +46,7 @@ namespace Service
             if (brands is null)
             {
                 Console.WriteLine("❌ brands is null!");
-                return Enumerable.Empty<BrandResultDto>(); // ← Safer fallback
+                return Enumerable.Empty<BrandResultDto>(); 
             }
 
             Console.WriteLine($"✅ Found {brands.Count()} brands.");
@@ -63,7 +66,7 @@ namespace Service
             if (types is null)
             {
                 Console.WriteLine("❌ brands is null!");
-                return Enumerable.Empty<TypeResultDto>(); // ← Safer fallback
+                return Enumerable.Empty<TypeResultDto>(); 
             }
 
             Console.WriteLine($"✅ Found {types.Count()} brands.");

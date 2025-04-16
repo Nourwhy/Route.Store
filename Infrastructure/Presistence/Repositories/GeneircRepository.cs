@@ -79,7 +79,7 @@ namespace Presistence.Repositories
             return await _context.Set<TEntity>().FindAsync(id);
         }
 
-        public async Task<TEntity?          > GetAsync(ISpecifications<TEntity, TKey> spec)
+        public async Task<TEntity?> GetAsync(ISpecifications<TEntity, TKey> spec)
         {
             return await ApplySpecifications(spec).FirstOrDefaultAsync();
         }
