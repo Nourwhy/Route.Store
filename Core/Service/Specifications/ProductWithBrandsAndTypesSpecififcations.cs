@@ -25,6 +25,9 @@ namespace Service.Specifications
                 )
             {
                 ApplyIncludes();
+            ApplySorting(sort);
+            ApplyPagination(pageIndex);
+              
             }
             private void ApplyIncludes()
         {
