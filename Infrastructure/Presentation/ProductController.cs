@@ -21,9 +21,9 @@ namespace Route.Store.Api
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllProducts()
+        public async Task<IActionResult> GetAllProducts([FromQuery]ProductSpecificationPramaeters pramaeters)
         {
-            var result = await _serviceManager.ProductService.GetAllProductsAsync();
+            var result = await _serviceManager.ProductService.GetAllProductsAsync(pramaeters);
             if (result is null) return BadRequest();
             return Ok(result);
         }
