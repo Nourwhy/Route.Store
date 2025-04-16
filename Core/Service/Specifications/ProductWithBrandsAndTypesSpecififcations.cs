@@ -16,16 +16,42 @@ namespace Service.Specifications
 
 
         }
-        public ProductWithBrandsAndTypesSpecififcations():base(null)
-        {
-            ApplyIncludes();
 
-        }
-        private void ApplyIncludes()
+        public ProductWithBrandsAndTypesSpecififcations(int? brandId, int? typeId, string? sort)
+                : base(
+                    P =>
+                        (!brandId.HasValue || P.BrandId == brandId) &&
+                        (!typeId.HasValue || P.TypeId == typeId) 
+                )
+            {
+                ApplyIncludes();
+            }
+            private void ApplyIncludes()
         {
 
             AddInclude(P=>P.ProductBrand);
             AddInclude(P=>P.ProductType);
+        }
+        private void ApplySorting(string? sort)
+        {
+            if (!string.IsNullOrEmpty(sort))
+            {
+                switch (sort.ToLower())
+                {
+                    case "namedesc":
+                        AddOrderByDescending(p => p.Name);
+                        break;
+                    case "priceasc":
+                       AddOrderBy(p => p.Price);
+                        break;
+                    case "pricedesc":
+                        AddOrderBy(p => p.Price);
+                        break;
+                    default:
+                        AddOrderBy(p => p.Name);
+                        break;
+                }
+            }
         }
     }
 }
