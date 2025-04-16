@@ -35,7 +35,7 @@ namespace Route.Store.Api.Controllers
         [HttpGet("brands")]
         public async Task<IActionResult> GetAllBrands()
         {
-            var result = await serviceManager.BrandService.GetAllBrandsAsync();
+            var result = await serviceManager.ProductService.GetAllBrandsAsync();
             if (result is null) return BadRequest();
             return Ok(result);
         }
@@ -45,7 +45,7 @@ namespace Route.Store.Api.Controllers
         [HttpGet("types")]
         public async Task<IActionResult> GetAllTypes()
         {
-            var result = await serviceManager.TypeService.GetAllTypeAsync();
+            var result = await serviceManager.ProductService.GetAllTypeAsync();
             if (result is null) return BadRequest();
             return Ok(result);
         }
