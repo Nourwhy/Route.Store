@@ -17,10 +17,10 @@ namespace Service
 
 
 
-        public async Task<IEnumerable<ProductResultDto>> GetAllProductsAsync(int? brandId, int? typeId, string? sort)
+        public async Task<IEnumerable<ProductResultDto>> GetAllProductsAsync(ProductSpecificationPramaeters pramaeters)
 
         {
-            var spec = new ProductWithBrandsAndTypesSpecififcations(brandId, typeId,sort);
+            var spec = new ProductWithBrandsAndTypesSpecififcations(pramaeters);
             var products = await unitOfWork.GetRepository<Product, int>().GetAllAsync(spec);
 
             var result = mapper.Map<IEnumerable<ProductResultDto>>(products);
@@ -74,6 +74,8 @@ namespace Service
             var result = mapper.Map<IEnumerable<TypeResultDto>>(types);
             return result;
         }
+
+        
     }
 
 }
