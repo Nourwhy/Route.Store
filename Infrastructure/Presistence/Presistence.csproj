@@ -12,6 +12,13 @@
     <None Remove="Data\Repositories\**" />
   </ItemGroup>
 
+	<ItemGroup>
+		<ProjectReference Include="..\..\Core\Domain\Domain.csproj" />
+		<ProjectReference Include="..\..\Core\Services.Abstractions\Services.Abstractions.csproj" />
+		<ProjectReference Include="..\..\Core\Service\Service.csproj" />
+		<ProjectReference Include="..\..\Shared\Shared.csproj" />
+		
+		</ItemGroup>
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.14" />
@@ -20,13 +27,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\Core\Domain\Domain.csproj" />
-    <ProjectReference Include="..\..\Core\Services.Abstractions\Services.Abstractions.csproj" />
-    <ProjectReference Include="..\..\Core\Service\Service.csproj" />
-    <ProjectReference Include="..\..\Shared\Shared.csproj" />
   </ItemGroup>
 
 </Project>

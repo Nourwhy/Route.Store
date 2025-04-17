@@ -9,7 +9,6 @@ namespace Services.Abstractions
     public  interface IServiceManager
     {
         IProductService ProductService { get; } 
-        IBrandService BrandService { get; } 
-        ITypeService TypeService { get; } 
+       
     }
 }

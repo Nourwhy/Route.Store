@@ -9,10 +9,13 @@ using System.Threading.Tasks;
 
 namespace Service
 {
-    public class ServiceManager(IUnitOfWork unitOfWork,IMapper mapper) : IServiceManager
+    public class ServiceManager : IServiceManager
     {
-        public IProductService ProductService { get; } = new ProductService(unitOfWork, mapper);
-        public IBrandService BrandService { get; } = new BrandService(unitOfWork, mapper);
-        public ITypeService TypeService { get; } = new TypeService(unitOfWork, mapper);
+        public IProductService ProductService { get; }
+
+        public ServiceManager(IUnitOfWork unitOfWork, IMapper mapper)
+        {
+            ProductService = new ProductService(unitOfWork, mapper);
+        }
     }
 }

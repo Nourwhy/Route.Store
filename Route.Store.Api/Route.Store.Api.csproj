@@ -21,9 +21,7 @@
     <ProjectReference Include="..\Core\Services.Abstractions\Services.Abstractions.csproj" />
     <ProjectReference Include="..\Core\Service\Service.csproj" />
     <ProjectReference Include="..\Infrastructure\Presistence\Presistence.csproj" />
-
-	  
-	  <ProjectReference Include="..\Shared\Shared.csproj" />
+    <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
 
