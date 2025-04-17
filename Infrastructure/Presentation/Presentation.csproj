@@ -11,10 +11,4 @@
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Route.Store.Api\Route.Store.Api.csproj" />
-    <ProjectReference Include="..\Presistence\Presistence.csproj" />
-
-  </ItemGroup>
-
 </Project>

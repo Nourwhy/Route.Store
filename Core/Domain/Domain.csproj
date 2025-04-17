@@ -18,8 +18,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Infrastructure\Presentation\Presentation.csproj" />
-    <ProjectReference Include="..\..\Infrastructure\Presistence\Presistence.csproj" />
-    <ProjectReference Include="..\..\Route.Store.Api\Route.Store.Api.csproj" />
     <ProjectReference Include="..\..\Shared\Shared.csproj" />
   </ItemGroup>
 

@@ -21,6 +21,7 @@ namespace Service.Specifications
         public ProductWithBrandsAndTypesSpecififcations(ProductSpecificationPramaeters pramaeters)
                 : base(
                     P =>
+                    (string.IsNullOrEmpty(pramaeters.Search)|| P.Name.ToLower().Contains(pramaeters.Search.ToLower()))&&
                         (!pramaeters.BrandId.HasValue || P.BrandId == pramaeters.BrandId) &&
                         (!pramaeters.TypeId.HasValue || P.TypeId == pramaeters.TypeId) 
                 )

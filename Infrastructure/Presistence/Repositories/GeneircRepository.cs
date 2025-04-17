@@ -24,6 +24,11 @@ namespace Presistence.Repositories
             await _context.AddAsync(entity);
         }
 
+        public async Task<int> CountAsync(ISpecifications<TEntity, TKey> spec)
+        {
+            return await ApplySpecifications(spec).CountAsync();
+        }
+
         public void Delete(TKey id)
         {
             var entity = _context.Set<TEntity>().Find(id);

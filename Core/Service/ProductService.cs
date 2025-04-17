@@ -17,14 +17,16 @@ namespace Service
 
 
 
-        public async Task<IEnumerable<ProductResultDto>> GetAllProductsAsync(ProductSpecificationPramaeters pramaeters)
+        public async Task<PaginationResponse<ProductResultDto>> GetAllProductsAsync(ProductSpecificationPramaeters pramaeters)
 
         {
             var spec = new ProductWithBrandsAndTypesSpecififcations(pramaeters);
             var products = await unitOfWork.GetRepository<Product, int>().GetAllAsync(spec);
+            var count = await unitOfWork.GetRepository<Product, int>().CountAsync(spec);
 
+            var specCount = new ProductWithCountSpecifications(pramaeters);
             var result = mapper.Map<IEnumerable<ProductResultDto>>(products);
-            return result;
+            return new PaginationResponse<ProductResultDto>(pramaeters.PageIndex, pramaeters.PageSize,0,result);
         }
 
 
