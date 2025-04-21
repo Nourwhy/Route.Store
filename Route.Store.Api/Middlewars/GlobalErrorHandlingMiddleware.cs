@@ -1,4 +1,5 @@
-﻿using Shared.ErrorModels;
+﻿using Domain.Exceptions;
+using Shared.ErrorModels;
 
 namespace Route.Store.Api.Middlewars
 {
@@ -33,9 +34,16 @@ namespace Route.Store.Api.Middlewars
 
                 var response = new ErrorDetails()
                 {
-                    StatusCode = StatusCodes.Status500InternalServerError,
                     ErrorMessage = ex.Message
                 };
+
+                response.StatusCode = ex switch
+                {
+                    NotFoundException => StatusCodes.Status404NotFound,
+                    _ => StatusCodes.Status500InternalServerError
+                };
+
+                context.Response.StatusCode = response.StatusCode;
 
                 await context.Response.WriteAsJsonAsync(response);
             }
