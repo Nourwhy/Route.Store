@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Presistence;
 using Presistence.Data;
 using Presistence.Repositories;
+using Route.Store.Api.Extensions;
 using Service;
 using Services.Abstractions;
 using Shared.ErrorModels;
@@ -20,63 +21,14 @@ namespace Route.Store.Api
             var builder = WebApplication.CreateBuilder(args);
 
 
-            builder.Services.AddControllers();
-   
 
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.RegisterAllServices(builder.Configuration);
 
-     
-            builder.Services.AddDbContext<StoreDbContext>(options =>
-            {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-            });
 
-    
-            builder.Services.AddScoped<IDbIntializer, DbInitializer>();
-            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddScoped<IServiceManager, ServiceManager>();
-            builder.Services.Configure<ApiBehaviorOptions>(config =>
-            {
-                config.InvalidModelStateResponseFactory = (actionContext) =>
-                {
-                    var errors = actionContext.ModelState
-                        .Where(m => m.Value.Errors.Any())
-                        .Select(m => new ValidationError()
-                        {
-                            Field = m.Key,
-                            Errors = m.Value.Errors.Select(error => error.ErrorMessage)
-                        }).ToList();
-
-                    var response = new ValidationErrorResponse()
-                    {
-                        Errors = errors
-                    };
-
-                    return new BadRequestObjectResult(response);
-                };
-            });
-            builder.Services.AddAutoMapper(typeof(AssemblyMapping).Assembly);
-        
             var app = builder.Build();
 
-            using (var scope = app.Services.CreateScope())
-            {
-                var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbIntializer>();
-                await dbInitializer.InitializeAsync();
-            }
-
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
-
-            app.UseHttpsRedirection();
-            app.UseAuthorization();
-            app.MapControllers();
-
-            await app.RunAsync(); 
+            app.ConfigureMiddlewares();
+           
         }
     }
 }
