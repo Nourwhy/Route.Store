@@ -15,9 +15,9 @@ namespace Route.Store.Api.Controllers
     {
         [HttpGet]
 
-        public async Task<IActionResult> GetAllProducts( int? brandId ,int? typeId, string? sort)
+        public async Task<IActionResult> GetAllProducts(ProductSpecificationPramaeters pramaeters)
         {
-            var result = await serviceManager.ProductService.GetAllProductsAsync(brandId,typeId,sort);
+            var result = await serviceManager.ProductService.GetAllProductsAsync(pramaeters);
             if (result is null) return BadRequest();
             return Ok(result);
 
