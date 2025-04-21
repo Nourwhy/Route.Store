@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Presistence.Data;
 using Presistence.Repositories;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +25,13 @@ namespace Presistence
 
 
            services.AddScoped<IDbIntializer, DbInitializer>();
+            services.AddScoped<IBasketRepository, BasketRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            services.AddSingleton<IConnectionMultiplexer>((serviceProvider) =>
+            {
+                return ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis"));
+            });
             return services;
 
         }

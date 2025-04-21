@@ -51,9 +51,9 @@ namespace Route.Store.Api.Middlewars
             response.StatusCode = ex switch
             {
                 NotFoundException => StatusCodes.Status404NotFound,
+                BadRequestException => StatusCodes.Status400BadRequest,
                 _ => StatusCodes.Status500InternalServerError
             };
-
             context.Response.StatusCode = response.StatusCode;
 
             await context.Response.WriteAsJsonAsync(response);
