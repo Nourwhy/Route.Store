@@ -20,15 +20,17 @@ namespace Route.Store.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-
-
+            // Register services
             builder.Services.RegisterAllServices(builder.Configuration);
-
 
             var app = builder.Build();
 
-            app.ConfigureMiddlewares();
-           
+            // Use middlewares
+            await app.ConfigureMiddlewares();
+
+            // Final run
+            await app.RunAsync();
+
         }
     }
 }

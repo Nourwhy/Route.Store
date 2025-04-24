@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Shared;
 using Shared.ErrorModels;
+using Route.Store.Api.Attributes;
 namespace Route.Store.Api.Controllers
 {
     [ApiController]
@@ -18,6 +19,7 @@ namespace Route.Store.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginationResponse<ProductResultDto>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorDetails))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorDetails))]
+        [Cache(100)]
         public async Task<ActionResult<PaginationResponse<ProductResultDto>>> GetAllProducts(ProductSpecificationPramaeters pramaeters)
         {
             var result = await serviceManager.ProductService.GetAllProductsAsync(pramaeters);
@@ -26,7 +28,7 @@ namespace Route.Store.Api.Controllers
 
         }
 
-        [HttpGet(template: "{id}")] // GET: /api/Products/1
+        [HttpGet( "{id}")] // GET: /api/Products/1
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ProductResultDto))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorDetails))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorDetails))]

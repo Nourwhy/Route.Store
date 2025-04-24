@@ -18,6 +18,8 @@ using Microsoft.AspNetCore.Identity;
 using Service;
 using Presistence;
 using Route.Store.Api.Middlewars;
+using Domain.Models.Identity;
+using Presistence.Identity;
 
 namespace Route.Store.Api.Extensions
 {
@@ -46,6 +48,13 @@ namespace Route.Store.Api.Extensions
         {
             services.AddControllers();
 
+            return services;
+        }
+
+        private static IServiceCollection AddIdentityServices(this IServiceCollection services)
+        {
+            services.AddIdentity<AppUser, IdentityRole>()
+                .AddEntityFrameworkStores<StoreIdentityDbContext>();
             return services;
         }
         private static IServiceCollection AddSwaggerServices(this IServiceCollection services)
@@ -95,17 +104,17 @@ namespace Route.Store.Api.Extensions
             app.UseAuthorization();
             app.MapControllers();
 
-            await app.RunAsync();
-
-            return app;
+            return app; 
         }
+
         private static async Task<WebApplication> InitializeDatabaseAsync(this WebApplication app)
         {
             using var scope = app.Services.CreateScope();
-            var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbIntializer>(); // ASK CLR Create Object DbInitializer
+            var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbIntializer>(); // ASK CLR Create Object From DbInitializer
             await dbInitializer.InitializeAsync();
-
+            await dbInitializer.InitializeIdentityAsync();
             return app;
+
         }
         private static async Task<WebApplication> UseGlobalErrorHandling(this WebApplication app)
         {
