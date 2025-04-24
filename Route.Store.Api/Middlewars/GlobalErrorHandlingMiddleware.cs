@@ -52,6 +52,8 @@ namespace Route.Store.Api.Middlewars
             {
                 NotFoundException => StatusCodes.Status404NotFound,
                 BadRequestException => StatusCodes.Status400BadRequest,
+                UnauthorizedException => StatusCodes.Status401Unauthorized,
+                ValidationException => HandleValidationExceptionAsync((ValidationException)ex,response),
                 _ => StatusCodes.Status500InternalServerError
             };
             context.Response.StatusCode = response.StatusCode;
@@ -69,6 +71,11 @@ namespace Route.Store.Api.Middlewars
             };
 
             await context.Response.WriteAsJsonAsync(response);
+        }
+        private static int HandleValidationExceptionAsync(ValidationException ex, ErrorDetails reponse)
+        {
+            reponse.Errors = ex.Errors;
+            return StatusCodes.Status400BadRequest;
         }
     }
 }
