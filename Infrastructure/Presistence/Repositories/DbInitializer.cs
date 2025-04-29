@@ -1,6 +1,7 @@
 ﻿using Domain.Contracts;
 using Domain.Models;
 using Domain.Models.Identity;
+using Domain.Models.OrderModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -84,7 +85,21 @@ namespace Presistence.Repositories
                     }
                 }
             }
+            if (!_context.DeliveryMethods.Any())
+            {
+                // 1. Read All Data From delivery Json File as String
+                var deliveryData = await File.ReadAllTextAsync(@"..\Infrastructure\Persistence\Data\SeedData\delivery.json");
 
+                // 2. Transform String To C# Objects [List<DeliveryMethod>]
+                var deliveryMethods = JsonSerializer.Deserialize<List<DeliveryMethod>>(deliveryData);
+
+                // 3. Add List<DeliveryMethod> To Database
+                if (deliveryMethods is not null && deliveryMethods.Any())
+                {
+                    await _context.DeliveryMethods.AddRangeAsync(deliveryMethods);
+                    await _context.SaveChangesAsync();
+                }
+            }
             if (_context.ChangeTracker.HasChanges())
             {
                 await _context.SaveChangesAsync();
