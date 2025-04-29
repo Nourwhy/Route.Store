@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Shared;
 using Shared.ErrorModels;
 using Route.Store.Api.Attributes;
+using Microsoft.AspNetCore.Authorization;
 namespace Route.Store.Api.Controllers
 {
     [ApiController]
@@ -33,7 +34,7 @@ namespace Route.Store.Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorDetails))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorDetails))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorDetails))]
-
+        [Authorize]
         public async Task<ActionResult<ProductResultDto>> GetProductById(int id)
         { 
          var result= await serviceManager.ProductService.GetProductByIdAsync(id);

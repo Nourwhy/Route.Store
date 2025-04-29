@@ -20,27 +20,46 @@ using Presistence;
 using Route.Store.Api.Middlewars;
 using Domain.Models.Identity;
 using Presistence.Identity;
+using Shared;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Route.Store.Api.Extensions
 {
     public static class Extensions
     {
-        public static IServiceCollection RegisterAllServices(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection RegisterAllApplicationService(this IServiceCollection services, IConfiguration configuration)
         {
 
-         
-            services.AddInfrastructureServices(configuration);
+
             services.AddBuiltInServices();
             services.AddSwaggerServices();
             services.ConfigureServices();
-            services.AddApplicationServices();
 
+            services.AddInfrastructureServices(configuration);
+            services.AddIdentityServices();
+            services.AddApplicationServices(configuration);
 
+            var jwtOptions = configuration.GetSection(key: "JwtOptions").Get<JwtOptions>();
 
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidateLifetime = true,
+                    ValidIssuer = jwtOptions.Issuer,
+                    ValidAudience = jwtOptions.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey))
+                };
+            });
 
-            services.AddAutoMapper(typeof(AssemblyReference).Assembly);
-            services.AddScoped<IServiceManager, ServiceManager>();
-            services.AddScoped<ICacheReposity, CacheReposity>();
 
 
 
@@ -53,7 +72,11 @@ namespace Route.Store.Api.Extensions
 
             return services;
         }
-
+        private static IServiceCollection ConfigureJwtServices(this IServiceCollection services)
+        {
+            services.AddControllers();
+            return services;
+        }
         private static IServiceCollection AddIdentityServices(this IServiceCollection services)
         {
             services.AddIdentity<AppUser, IdentityRole>()
@@ -104,6 +127,7 @@ namespace Route.Store.Api.Extensions
             }
 
             app.UseHttpsRedirection();
+            app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
 

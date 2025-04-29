@@ -129,12 +129,20 @@ namespace Presistence.Repositories
                     PhoneNumber = "0123456789"
                 };
 
-                await _userManager.CreateAsync(superAdminUser, password: "Pa$$wOrd");
-                await _userManager.CreateAsync(adminUser, password: "Pa$$wOrd");
+                var superAdminResult = await _userManager.CreateAsync(superAdminUser, "Pa$$wOrd");
+                var adminResult = await _userManager.CreateAsync(adminUser, "Pa$$wOrd");
 
-                await _userManager.AddToRoleAsync(superAdminUser,  "SuperAdmin");
-                await _userManager.AddToRoleAsync(adminUser,  "Admin");
+                if (superAdminResult.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(superAdminUser, "SuperAdmin");
+                }
+
+                if (adminResult.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(adminUser, "Admin");
+                }
             }
+
         }
     }
-}
+    }
