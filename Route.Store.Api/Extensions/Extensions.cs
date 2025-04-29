@@ -33,13 +33,16 @@ namespace Route.Store.Api.Extensions
             services.AddBuiltInServices();
             services.AddSwaggerServices();
             services.ConfigureServices();
+            services.AddApplicationServices();
 
 
 
 
             services.AddAutoMapper(typeof(AssemblyReference).Assembly);
             services.AddScoped<IServiceManager, ServiceManager>();
-           
+            services.AddScoped<ICacheReposity, CacheReposity>();
+
+
 
             return services;
 
