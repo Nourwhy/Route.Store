@@ -1,7 +1,12 @@
 ﻿using Domain.Contracts;
 using Domain.Models;
+using Domain.Models.Identity;
+using Domain.Models.OrderModels;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Presistence.Data;
+using Presistence.Identity;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,12 +19,21 @@ namespace Presistence.Repositories
     public class DbInitializer : IDbIntializer
     {
         private readonly StoreDbContext _context;
+        private readonly StoreIdentityDbContext _identityDbContext;
+        private readonly UserManager<AppUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public DbInitializer(StoreDbContext context)
+        public DbInitializer(
+            StoreDbContext context,
+            StoreIdentityDbContext identityDbContext,
+            UserManager<AppUser> userManager,
+            RoleManager<IdentityRole> roleManager)
         {
             _context = context;
+            _identityDbContext = identityDbContext;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
-
         public async Task InitializeAsync()
         {
         
@@ -71,11 +85,79 @@ namespace Presistence.Repositories
                     }
                 }
             }
+            if (!_context.DeliveryMethods.Any())
+            {
+                // 1. Read All Data From delivery Json File as String
+                var deliveryData = await File.ReadAllTextAsync(@"..\Infrastructure\Persistence\Data\SeedData\delivery.json");
 
+                // 2. Transform String To C# Objects [List<DeliveryMethod>]
+                var deliveryMethods = JsonSerializer.Deserialize<List<DeliveryMethod>>(deliveryData);
+
+                // 3. Add List<DeliveryMethod> To Database
+                if (deliveryMethods is not null && deliveryMethods.Any())
+                {
+                    await _context.DeliveryMethods.AddRangeAsync(deliveryMethods);
+                    await _context.SaveChangesAsync();
+                }
+            }
             if (_context.ChangeTracker.HasChanges())
             {
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task InitializeIdentityAsync()
+        {
+            // Create Database If it doesn't Exists && Apply To Any Pending Migrations
+            if (_identityDbContext.Database.GetPendingMigrations().Any())
+            {
+                await _identityDbContext.Database.MigrateAsync();
+            }
+            if (!_roleManager.Roles.Any())
+            {
+                await _roleManager.CreateAsync(role: new IdentityRole()
+                {
+                    Name = "Admin"
+                });
+                await _roleManager.CreateAsync(role: new IdentityRole()
+                {
+                    Name = "SuperAdmin"
+                });
+            }
+
+            // Seeding
+            if (!_userManager.Users.Any())
+            {
+                var superAdminUser = new AppUser()
+                {
+                    DisplayName = "Super Admin",
+                    Email = "SuperAdmin@gmail.com",
+                    UserName = "SuperAdmin",
+                    PhoneNumber = "0123456789"
+                };
+
+                var adminUser = new AppUser()
+                {
+                    DisplayName = "Admin",
+                    Email = "Admin@gmail.com",
+                    UserName = "Admin",
+                    PhoneNumber = "0123456789"
+                };
+
+                var superAdminResult = await _userManager.CreateAsync(superAdminUser, "Pa$$wOrd");
+                var adminResult = await _userManager.CreateAsync(adminUser, "Pa$$wOrd");
+
+                if (superAdminResult.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(superAdminUser, "SuperAdmin");
+                }
+
+                if (adminResult.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(adminUser, "Admin");
+                }
+            }
+
+        }
     }
-}
+    }

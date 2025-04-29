@@ -1,6 +1,10 @@
 ﻿using AutoMapper;
 using Domain.Contracts;
+using Domain.Models.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Services.Abstractions;
+using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +13,21 @@ using System.Threading.Tasks;
 
 namespace Service
 {
-    public class ServiceManager(IUnitOfWork unitOfWork,IMapper mapper) : IServiceManager
+    public class ServiceManager(
+       IUnitOfWork unitOfWork,
+       IMapper mapper,
+       IBasketRepository basketRepository,
+       ICacheReposity cacheRepository,
+       UserManager<AppUser> userManager,
+       IOptions<JwtOptions> options
+   ) : IServiceManager
     {
         public IProductService ProductService { get; } = new ProductService(unitOfWork, mapper);
-        public IBrandService BrandService { get; } = new BrandService(unitOfWork, mapper);
-        public ITypeService TypeService { get; } = new TypeService(unitOfWork, mapper);
+        public IBasketService BasketService { get; } = new BasketService(basketRepository, mapper);
+        public ICacheService CacheService { get; } = new CacheService(cacheRepository);
+        public IAuthService AuthService { get; } = new AuthService(userManager,options);
+
+        public IOrderService OrderService { get; } = new OrderService (mapper,basketRepository,unitOfWork);
+
     }
 }

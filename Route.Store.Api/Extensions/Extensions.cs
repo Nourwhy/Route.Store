@@ -1,0 +1,153 @@
+﻿using Domain.Contracts;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Presistence.Data;
+using Shared.ErrorModels;
+using Presistence.Repositories;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Services.Abstractions;
+using Microsoft.AspNetCore.Identity;
+using Service;
+using Presistence;
+using Route.Store.Api.Middlewars;
+using Domain.Models.Identity;
+using Presistence.Identity;
+using Shared;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+
+namespace Route.Store.Api.Extensions
+{
+    public static class Extensions
+    {
+        public static IServiceCollection RegisterAllApplicationService(this IServiceCollection services, IConfiguration configuration)
+        {
+
+
+            services.AddBuiltInServices();
+            services.AddSwaggerServices();
+            services.ConfigureServices();
+
+            services.AddInfrastructureServices(configuration);
+            services.AddIdentityServices();
+            services.AddApplicationServices(configuration);
+
+            var jwtOptions = configuration.GetSection(key: "JwtOptions").Get<JwtOptions>();
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidateLifetime = true,
+                    ValidIssuer = jwtOptions.Issuer,
+                    ValidAudience = jwtOptions.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey))
+                };
+            });
+
+
+
+
+            return services;
+
+        }
+        private static IServiceCollection AddBuiltInServices(this IServiceCollection services)
+        {
+            services.AddControllers();
+
+            return services;
+        }
+        private static IServiceCollection ConfigureJwtServices(this IServiceCollection services)
+        {
+            services.AddControllers();
+            return services;
+        }
+        private static IServiceCollection AddIdentityServices(this IServiceCollection services)
+        {
+            services.AddIdentity<AppUser, IdentityRole>()
+                .AddEntityFrameworkStores<StoreIdentityDbContext>();
+            return services;
+        }
+        private static IServiceCollection AddSwaggerServices(this IServiceCollection services)
+        {
+            services.AddEndpointsApiExplorer();
+            services.AddSwaggerGen();
+
+            return services;
+        }
+        private static IServiceCollection ConfigureServices(this IServiceCollection services)
+        {
+            services.Configure<ApiBehaviorOptions>(config =>
+            {
+                config.InvalidModelStateResponseFactory = (actionContext) =>
+                {
+                    var errors = actionContext.ModelState
+                        .Where(m => m.Value.Errors.Any())
+                        .Select(m => new ValidationError()
+                        {
+                            Field = m.Key,
+                            Errors = m.Value.Errors.Select(error => error.ErrorMessage)
+                        }).ToList();
+
+                    var response = new ValidationErrorResponse()
+                    {
+                        Errors = errors
+                    };
+
+                    return new BadRequestObjectResult(response);
+                };
+            });
+
+            return services;
+        }
+        public static async Task<WebApplication> ConfigureMiddlewares(this WebApplication app)
+        {
+            await app.InitializeDatabaseAsync();
+
+            app.UseGlobalErrorHandling();
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.MapControllers();
+
+            return app; 
+        }
+
+        private static async Task<WebApplication> InitializeDatabaseAsync(this WebApplication app)
+        {
+            using var scope = app.Services.CreateScope();
+            var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbIntializer>(); // ASK CLR Create Object From DbInitializer
+            await dbInitializer.InitializeAsync();
+            await dbInitializer.InitializeIdentityAsync();
+            return app;
+
+        }
+        private static async Task<WebApplication> UseGlobalErrorHandling(this WebApplication app)
+        {
+            app.UseMiddleware<GlobalErrorHandlingMiddleware>();
+
+            return app;
+        }
+    }
+}

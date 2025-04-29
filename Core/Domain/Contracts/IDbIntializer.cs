@@ -10,5 +10,6 @@ namespace Domain.Contracts
     {
 
         Task InitializeAsync();
+        Task InitializeIdentityAsync();
     }
 }
